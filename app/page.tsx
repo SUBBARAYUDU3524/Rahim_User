@@ -12,7 +12,7 @@ interface Client {
   date: string;
   place: string;
   status: 'ACTIVE' | 'INACTIVE';
-  stockType: 'DELIVERY' | 'SALES';
+  stockType: 'DELIVERY' | 'SALES' | 'NO STOCK';
   margin: number;
 }
 
@@ -36,6 +36,7 @@ export default function ClientList() {
   const activeClients = clients.filter(c => c.status === 'ACTIVE').length;
   const salesClients = clients.filter(c => c.stockType === 'SALES').length;
   const deliveryClients = clients.filter(c => c.stockType === 'DELIVERY').length;
+  const inactiveClients = clients.filter(c => c.status === 'INACTIVE').length;
   const totalClients = clients.length;
 
   useEffect(() => {
@@ -168,9 +169,11 @@ export default function ClientList() {
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <p className="text-sm text-gray-500">Stock Type</p>
                       <p className={`font-medium ${
-                        selectedClient.stockType === 'SALES' ? 'text-green-600' : 'text-purple-600'
+                        selectedClient.stockType === 'SALES' ? 'text-green-600' : 
+                        selectedClient.stockType === 'DELIVERY' ? 'text-purple-600' : 'text-gray-600'
                       }`}>
-                        {selectedClient.stockType}
+                        {selectedClient.stockType === 'SALES' ? 'Sales Stock' : 
+                         selectedClient.stockType === 'DELIVERY' ? 'Delivery Stock' : 'No Stock'}
                       </p>
                     </div>
                     <div className="bg-gray-50 p-4 rounded-lg">
@@ -230,9 +233,9 @@ export default function ClientList() {
                     <FiTruck className="mr-1.5" />
                     Delivery: {deliveryClients}
                   </div>
-                  <div className="flex items-center bg-purple-500/20 px-3 py-1 rounded-full text-white text-sm">
-                    <FiZap  className="mr-1.5" />
-                    Total: {totalClients}
+                  <div className="flex items-center bg-red-500/20 px-3 py-1 rounded-full text-white text-sm">
+                    <FiZap className="mr-1.5" />
+                    Inactive: {inactiveClients}
                   </div>
                 </div>
               </div>
@@ -273,7 +276,7 @@ export default function ClientList() {
           </div>
         </div>
 
-        {/* Filters Panel - Now outside the sticky header */}
+        {/* Filters Panel */}
         {showFilters && (
           <div className="p-4 bg-white border-b border-gray-200 shadow-sm">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -297,8 +300,9 @@ export default function ClientList() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-400"
                 >
                   <option value="">All Types</option>
-                  <option value="SALES">Sales</option>
-                  <option value="DELIVERY">Delivery</option>
+                  <option value="SALES">Sales Stock</option>
+                  <option value="DELIVERY">Delivery Stock</option>
+                  <option value="NO STOCK">No Stock</option>
                 </select>
               </div>
               <div>
@@ -349,7 +353,7 @@ export default function ClientList() {
           </div>
         )}
 
-        {/* Client Cards - Now always appears after filters when open */}
+        {/* Client Cards */}
         <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
           {filteredClients.length === 0 ? (
             <div className="col-span-full text-center py-12">
@@ -393,7 +397,8 @@ export default function ClientList() {
                 )}
                 
                 <div className={`absolute inset-x-0 top-0 h-1 ${
-                  client.stockType === 'SALES' ? 'bg-gradient-to-r from-green-400 to-emerald-500' : 'bg-gradient-to-r from-purple-400 to-indigo-500'
+                  client.stockType === 'SALES' ? 'bg-gradient-to-r from-green-400 to-emerald-500' : 
+                  client.stockType === 'DELIVERY' ? 'bg-gradient-to-r from-purple-400 to-indigo-500' : 'bg-gray-400'
                 }`}></div>
                 
                 <div className="p-6">
@@ -401,10 +406,14 @@ export default function ClientList() {
                     <div className={`flex-shrink-0 h-14 w-14 rounded-full flex items-center justify-center transition-colors ${
                       client.stockType === 'SALES' ? 
                         'bg-gradient-to-br from-green-100 to-emerald-100 group-hover:from-green-200 group-hover:to-emerald-200' :
-                        'bg-gradient-to-br from-purple-100 to-indigo-100 group-hover:from-purple-200 group-hover:to-indigo-200'
+                        client.stockType === 'DELIVERY' ?
+                        'bg-gradient-to-br from-purple-100 to-indigo-100 group-hover:from-purple-200 group-hover:to-indigo-200' :
+                        'bg-gray-100 group-hover:bg-gray-200'
                     }`}>
                       <FiUser className={`text-2xl transition-colors ${
-                        client.stockType === 'SALES' ? 'text-green-600 group-hover:text-emerald-700' : 'text-purple-600 group-hover:text-indigo-700'
+                        client.stockType === 'SALES' ? 'text-green-600 group-hover:text-emerald-700' : 
+                        client.stockType === 'DELIVERY' ? 'text-purple-600 group-hover:text-indigo-700' :
+                        'text-gray-600 group-hover:text-gray-700'
                       }`} />
                     </div>
                     <div className="ml-4 flex-1 min-w-0">
@@ -421,9 +430,12 @@ export default function ClientList() {
                   {/* Stock Type and Margin */}
                   <div className="mt-3 flex items-center justify-between">
                     <div className={`px-2 py-1 rounded-md text-xs font-medium ${
-                      client.stockType === 'SALES' ? 'bg-green-50 text-green-700' : 'bg-purple-50 text-purple-700'
+                      client.stockType === 'SALES' ? 'bg-green-50 text-green-700' : 
+                      client.stockType === 'DELIVERY' ? 'bg-purple-50 text-purple-700' : 
+                      'bg-gray-100 text-gray-800'
                     }`}>
-                      {client.stockType} STOCK
+                      {client.stockType === 'SALES' ? 'Sales Stock' : 
+                       client.stockType === 'DELIVERY' ? 'Delivery Stock' : 'No Stock'}
                     </div>
                     <div className="text-sm font-medium text-gray-700">
                       <span className="text-gray-500">Margin:</span> ₹ {client.margin}
