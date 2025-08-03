@@ -30,6 +30,7 @@ export default function ClientList() {
     minMargin: '',
     maxMargin: ''
   });
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   // Stats
   const activeClients = clients.filter(c => c.status === 'ACTIVE').length;
@@ -111,6 +112,10 @@ export default function ClientList() {
     setSearchTerm('');
   };
 
+  const closeModal = () => {
+    setSelectedClient(null);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -122,6 +127,83 @@ export default function ClientList() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 pb-20">
       <div className="container mx-auto p-4 max-w-7xl">
+        {/* Client Details Modal */}
+        {selectedClient && (
+          <div className="fixed inset-0 bg-gray-200 bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div 
+              className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-2xl font-bold text-gray-800">Client Details</h3>
+                  <button 
+                    onClick={closeModal}
+                    className="text-gray-500 hover:text-gray-700 transition-colors"
+                  >
+                    <FiX size={24} />
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center">
+                    <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                      <FiUser className="text-blue-600 text-2xl" />
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-semibold text-gray-800">{selectedClient.clientName}</h4>
+                      <p className="text-gray-600">{selectedClient.clientId}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <p className="text-sm text-gray-500">Status</p>
+                      <p className={`font-medium ${
+                        selectedClient.status === 'ACTIVE' ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {selectedClient.status}
+                      </p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <p className="text-sm text-gray-500">Stock Type</p>
+                      <p className={`font-medium ${
+                        selectedClient.stockType === 'SALES' ? 'text-green-600' : 'text-purple-600'
+                      }`}>
+                        {selectedClient.stockType}
+                      </p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <p className="text-sm text-gray-500">Margin</p>
+                      <p className="font-medium text-gray-800">₹ {selectedClient.margin}</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <p className="text-sm text-gray-500">Place</p>
+                      <p className="font-medium text-gray-800">{selectedClient.place}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-500">Mobile Number</p>
+                    <p className="font-medium text-gray-800 flex items-center">
+                      <FiPhone className="mr-2" />
+                      {selectedClient.mobileNum}
+                    </p>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-500">Date</p>
+                    <p className="font-medium text-gray-800 flex items-center">
+                      <FiCalendar className="mr-2" />
+                      {selectedClient.date}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Sticky Header */}
         <div className="sticky top-0 z-10 bg-white shadow-sm">
           {/* Header with Gradient Background */}
@@ -268,7 +350,7 @@ export default function ClientList() {
         )}
 
         {/* Client Cards - Now always appears after filters when open */}
-        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
           {filteredClients.length === 0 ? (
             <div className="col-span-full text-center py-12">
               <div className="mx-auto bg-white p-6 rounded-xl shadow-md max-w-md">
@@ -293,7 +375,8 @@ export default function ClientList() {
             filteredClients.map((client) => (
               <div
                 key={client.id}
-                className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 group relative"
+                className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 group relative cursor-pointer"
+                onClick={() => setSelectedClient(client)}
               >
                 {/* Status badge */}
                 <div className={`absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full shadow-md ${
